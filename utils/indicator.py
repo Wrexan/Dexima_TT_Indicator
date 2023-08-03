@@ -163,6 +163,10 @@ class CustomTradeIndicator:
                     if close_ < bottom:
                         del self.long_boxes[i]
 
+            candle_color = self.bullish_trend_color if self.candle_colour_mode else self.bearish_trend_colour
+            candle_color = self.BOS_candle_colour if self.bos_candle else candle_color
+            self.fig.data[0].increasing.fillcolor = candle_color
+
             # record last up and down candles
             if close_ < open_:
                 self.last_down = high_
