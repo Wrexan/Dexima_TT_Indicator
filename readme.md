@@ -1,6 +1,11 @@
 ## TradeView Indicator
 This program is the result of a test task  
-It is a TradeView Indicator translated to Python from Pine Script  
+It is a TradeView Indicator translated to Python from Pine Script
+
+Download this application:
+```
+git clone https://github.com/Wrexan/Dexima_TT_Indicator.git
+```
 Install all packages:
 ```
 pip install -r requirements.txt
