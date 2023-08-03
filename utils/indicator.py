@@ -42,6 +42,8 @@ class CustomTradeIndicator:
         self.long_boxes = []
         self.short_boxes = []
         self.bos_lines = []
+        self.PDH_line = None
+        self.PDL_line = None
 
         self.last_long_index: int = 0
         self.last_short_index: int = 0
@@ -69,6 +71,39 @@ class CustomTradeIndicator:
             high_ = self.tv.high()
             close_ = self.tv.close()
             open_ = self.tv.open()
+
+            if self.show_PD:
+                # check only the last bars to speed up
+                if bar_index >= self.tv.last_idx - 20:
+                    PDH = self.tv.security('', 'D', self.tv.high, 1)
+                    PDL = self.tv.security('', 'D', self.tv.low, 1)
+                    if PDH:
+                        del self.PDH_line
+                        del self.PDL_line
+
+                        self.PDH_line = self.tv.new_line(
+                            x0=0,
+                            x1=bar_index,
+                            y0=PDH,
+                            y1=PDH,
+                            xref='x',
+                            yref='y',
+                            color="LightBlue",
+                            width=1
+                        )
+                        self.PDL_line = self.tv.new_line(
+                            x0=0,
+                            x1=bar_index,
+                            y0=PDL,
+                            y1=PDL,
+                            xref='x',
+                            yref='y',
+                            color="LightBlue",
+                            width=1
+                        )
+
+
+
 
             # get the lowest point in the range
             self.structure_low = self.tv.lowest(low_, self.candle_range, 1)
@@ -193,8 +228,11 @@ class CustomTradeIndicator:
         elements_to_render = [
             *self.short_boxes,
             *self.long_boxes,
-            *self.bos_lines
+            *self.bos_lines,
         ]
+        if self.PDH_line:
+            elements_to_render.append(self.PDH_line)
+            elements_to_render.append(self.PDL_line)
         # draw filtered shapes
         for element in elements_to_render:
             self.fig.add_shape(element.shape)

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 
 
@@ -8,6 +10,16 @@ class TradeView:
         self.dataframe = dataframe
         self._bar_index: int = 0
         self.last_idx: int = len(dataframe) - 1
+
+        self.curr_datetime = datetime.strptime(self.bar_date(), '%Y-%m-%d')
+        self.last_cycle_date = self.curr_datetime
+
+    def security(self, symbol: str, resolution: str, expression, bar_idx_in_past):
+        curr_datetime = datetime.strptime(self.bar_date(), '%Y-%m-%d')
+        if resolution == 'D':
+            if datetime.strptime(self.bar_date(self._bar_index - 1), '%Y-%m-%d').day != curr_datetime.day:
+                self.last_cycle_date = curr_datetime
+                return expression(bar_idx_in_past)
 
     @property
     def step_forward(self):
@@ -22,12 +34,10 @@ class TradeView:
         return self._do_relative_past_idx_to_idx(bar_idx_in_past)
 
     def bar_date(self, bar_idx: int = 0):
-        """Returns date of bar index. Return date of current bar if no bar_idx."""
-        if bar_idx:
-            return self.dataframe.iloc[self._do_valid_absolute_idx(bar_idx)]['date']
-        return self.dataframe.iloc[self._do_relative_past_idx_to_idx(self._bar_index)]['date']
+        """Returns date of bar index."""
+        return self.dataframe.iloc[self._do_valid_absolute_idx(bar_idx)]['date']
 
-    def _do_relative_past_idx_to_idx(self, bar_idx_in_past: int):
+    def _do_relative_past_idx_to_idx(self, bar_idx_in_past: int = 0):
         """Returns valid bar index, relative to current.
          Positive bar_idx_in_past will return index in the past."""
         return self._do_valid_absolute_idx(self._bar_index - bar_idx_in_past)
@@ -110,7 +120,7 @@ class TradeView:
     #     return pd.DataFrame(result)
 
     def new_box(self, x0: int, x1: int, y0: float, y1: float, xref: str = 'x', yref: str = 'y', line_width: int = 1,
-                        fillcolor: str = 'rgb(100, 120, 120)'):
+                fillcolor: str = 'rgb(100, 120, 120)'):
         """Creates instance of visual box shape to draw squares on plotly canvas.
         To use: figure.add_shape(this.shape)"""
         return self.Box(self, x0, x1, y0, y1, xref, yref, line_width, fillcolor)
@@ -185,7 +195,7 @@ class TradeView:
                 'y0': self.y0, 'y1': self.y1,
                 'xref': self.xref, 'yref': self.yref,
                 'line': {
-                            'color': self.color,
-                            'width': self.width,
-                        }
+                    'color': self.color,
+                    'width': self.width,
+                }
             }
